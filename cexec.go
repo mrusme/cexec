@@ -10,6 +10,7 @@ import (
   "strings"
   "crypto/sha256"
   "encoding/hex"
+  "encoding/base64"
 
   "github.com/mrusme/cexec/backends"
 )
@@ -29,7 +30,7 @@ func main() {
     os.Exit(1)
   }
   defer backend.Uninitialize()
-  
+
   command := flag.Args()
 
   if len(command) == 0 {
@@ -41,12 +42,12 @@ func main() {
   cmdIdHash := sha256.Sum256([]byte(strings.Join(command, " ")))
   cmdId := hex.EncodeToString(cmdIdHash[:])
 
+  var stdout, stderr bytes.Buffer
   var strout, strerr string
   hit, strerr, strout, _ := backend.Read(cmdId)
-  
+
   if hit == false {
     cmd := exec.Command(command[0], command[1:]...)
-    var stdout, stderr bytes.Buffer
     cmd.Stdout = &stdout
     cmd.Stderr = &stderr
 
@@ -56,14 +57,19 @@ func main() {
       os.Exit(1)
     }
 
-    strout, strerr = string(stdout.Bytes()), string(stderr.Bytes())
+    strout, strerr = base64.StdEncoding.EncodeToString(stdout.Bytes()), base64.StdEncoding.EncodeToString(stderr.Bytes())
 
     now := time.Now()
     expire := now.Add(time.Second * time.Duration(timeout))
 
     backend.Write(cmdId, strerr, strout, expire)
+  } else {
+    b64out, _ := base64.StdEncoding.DecodeString(strout)
+    stdout.Write(b64out)
+    b64err, _ := base64.StdEncoding.DecodeString(strerr)
+    stderr.Write(b64err)
   }
 
-  fmt.Fprintf(os.Stdout, strout)
-  fmt.Fprintf(os.Stderr, strerr)
+  os.Stdout.Write(stdout.Bytes())
+  os.Stderr.Write(stderr.Bytes())
 }
