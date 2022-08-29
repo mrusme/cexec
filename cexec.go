@@ -48,6 +48,7 @@ func main() {
 
   if hit == false {
     cmd := exec.Command(command[0], command[1:]...)
+    cmd.Stdin  = os.Stdin
     cmd.Stdout = &stdout
     cmd.Stderr = &stderr
 
