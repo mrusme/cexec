@@ -1,0 +1,14 @@
+.{
+    .name = .cexec,
+    .version = "1.0.0",
+    .minimum_zig_version = "0.16.0",
+    .fingerprint = 0x829b6b59be6fd40e,
+    .dependencies = .{},
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "src",
+        "LICENSE",
+        "README.md",
+    },
+}

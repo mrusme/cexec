@@ -1,2 +1,3 @@
-/cexec
-
+/.zig-cache/
+/zig-out/
+/dist/
